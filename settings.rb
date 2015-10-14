@@ -63,15 +63,14 @@ end
 # mysqlのルート設定
 root_password = node['mysql']['users'][0]['user_password']
 execute "password set for root" do
-  command "mysql -u root -p#{root_password} -e \"UPDATE mysql.user SET Password=PASSWORD(\'#{root_password}\') WHERE User='root';\""
-  not_if "mysql -u root -e \"UPDATE mysql.user SET Password=PASSWORD(\'#{root_password}\') WHERE User='root';\""
+  command "mysql -u root -e \"UPDATE mysql.user SET Password=PASSWORD(\'#{root_password}\') WHERE User='root';\""
 end
 
 # mysqlデータベース作成
 db_name = node['mysql']['db_name']
 execute "create database" do
-  command "mysql -u root -p#{root_password} -e \"CREATE DATABASE #{db_name}\""
-  not_if "mysql -u root -p#{root_password} -e \"SHOW DATABASES\" | grep #{db_name}"
+  command "mysql -u root -e \"CREATE DATABASE #{db_name}\""
+  not_if "mysql -u root -e \"SHOW DATABASES\" | grep #{db_name}"
 end
 
 # mysqlユーザ作成
@@ -82,18 +81,21 @@ node['mysql']['users'].length.times do |i|
   if user_name == "root" then
     execute "databases setting" do
       command <<-EOL
-        mysql -u root -p#{user_password} -e "DELETE FROM mysql.user WHERE User='';"
-        mysql -u root -p#{user_password} -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1');"
-        mysql -u root -p#{user_password} -e "DROP DATABASE test;"
-        mysql -u root -p#{user_password} -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
-        mysql -u root -p#{user_password} -e "FLUSH PRIVILEGES;"
+        mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
+        mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1');"
+        mysql -u root -e "DROP DATABASE test;"
+        mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
       EOL
     end
   else
     execute "create users" do
       command <<-EOL
-        mysql -u root -p#{root_password} -e "GRANT ALL ON #{db_name}.* TO \'#{user_name}\'@localhost IDENTIFIED BY \'#{user_password}\';"
+        mysql -u root -e "GRANT ALL ON #{db_name}.* TO \'#{user_name}\'@localhost IDENTIFIED BY \'#{user_password}\';"
       EOL
     end
   end
+end
+
+execute "reflect the setting" do
+  command "mysql -u root -e 'FLUSH PRIVILEGES;'"
 end
