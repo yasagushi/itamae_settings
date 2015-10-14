@@ -31,6 +31,28 @@ remote_file '/etc/php.ini' do
   group 'root'
 end
 
+# apacheの設定
+remote_file '/etc/httpd/conf/httpd.conf' do
+  mode '644'
+  owner 'root'
+  group 'root'
+end
+
+node['domains'].each do |domain|
+  directory "/var/www/#{domain}/html" do
+    owner "web-admin"
+    group "web-admin"
+    mode "775"
+  end
+
+  template "/etc/httpd/conf.d/#{domain}.conf" do
+    source "templates/virtual_host.conf.erb"
+    owner 'apache'
+    group 'apache'
+    variables(domain: "#{domain}")
+  end
+end
+
 # mysqlの設定
 remote_file '/etc/my.cnf' do
   mode '644'
