@@ -45,6 +45,12 @@ node['domains'].each do |domain|
     mode "775"
   end
 
+  directory "/var/log/httpd/#{domain}" do
+    owner "root"
+    group "root"
+    mode "644"
+  end
+
   template "/etc/httpd/conf.d/#{domain}.conf" do
     source "templates/virtual_host.conf.erb"
     owner 'apache'
