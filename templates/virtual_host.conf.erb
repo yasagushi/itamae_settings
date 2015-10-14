@@ -1,0 +1,10 @@
+<VirtualHost <%= @domain %>:80>
+    ServerName <%= @domain %>
+    DocumentRoot "/var/www/<%= @domain %>/html"
+    DirectoryIndex index.html index.php
+    ErrorLog /var/log/httpd/<%= @domain %>/<%= @domain %>_error_log
+    CustomLog /var/log/httpd/<%= @domain %>/<%= @domain %>_access_log combined
+    <Directory "/var/www/<%= @domain %>/html">
+        AllowOverride All
+    </Directory>
+</VirtualHost>
