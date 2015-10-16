@@ -17,6 +17,11 @@ remote_file '/etc/ssh/sshd_config' do
   group 'root'
 end
 
+service 'sshd' do
+  action :restart
+  user "root"
+end
+
 # yumのアップデート対象を設定
 remote_file '/etc/yum.conf' do
   mode '644'
@@ -59,7 +64,31 @@ node['domains'].each do |domain|
   end
 end
 
+service "httpd" do
+  action :restart
+  user "root"
+end
+
+# iptablesの設定
+remote_file '/home/vagrant/iptables_setting.sh' do
+  mode '755'
+  owner 'root'
+  group 'root'
+end
+
+execute "set iptables" do
+  command "/bin/bash /home/vagrant/iptables_setting.sh"
+end
+
+execute "delete iptables_setting script" do
+  command "rm -f /home/vagrant/iptables_setting.sh"
+end
+
 # mysqlの設定
+service "mysqld" do
+  action :start
+end
+
 remote_file '/etc/my.cnf' do
   mode '644'
   owner 'root'
