@@ -126,6 +126,7 @@ node['mysql']['users'].length.times do |i|
     execute "create users" do
       command <<-EOL
         mysql -u root -e "GRANT ALL ON #{db_name}.* TO \'#{user_name}\'@localhost IDENTIFIED BY \'#{user_password}\';"
+        mysql -u root -e "GRANT ALL ON #{db_name}.* TO \'#{user_name}\'@127.0.0.1 IDENTIFIED BY \'#{user_password}\';"
       EOL
     end
   end
